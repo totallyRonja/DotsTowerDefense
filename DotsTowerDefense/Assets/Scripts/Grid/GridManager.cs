@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Unity.Burst;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -32,6 +35,76 @@ public class GridManager : MonoBehaviour
             };
 
         Instance = this;
+    }
+
+    public int DataIndex(int2 gridPos)
+    {
+        int index = gridPos.x + gridPos.y * gridSize.x;
+        if(index > data.Length)
+            Debug.LogWarning($"generated index {index} outside of grid range");
+        return index;
+    }
+    
+    public int2 GridPosFromWorldPos(float3 worldPos)
+    {
+        float2 relPos = (worldPos.xz - posOffset) / tileSize;
+        return math.clamp((int2)math.round(relPos), 0, gridSize);
+    }
+
+    public bool InBounds(int2 pos)
+    {
+        return pos.x >= 0 && pos.y >= 0 && pos.x < gridSize.x && pos.y < gridSize.y;
+    }
+    
+    static readonly int2[] Directions = 
+    {
+        new int2(0, 1),
+        new int2(1, 0),
+        new int2(0, -1),
+        new int2(-1, 0),
+    };
+
+    [BurstCompile]
+    public void RecalculatePaths()
+    {
+        var queue = new Queue<FlowFieldPoint>();
+        queue.Enqueue(new FlowFieldPoint
+        {
+            exitDistance = 0,
+            position = exit,
+        });
+
+        var exploredTiles = new HashSet<int2> {exit};
+
+        var order = Utility.CountArray(0, Directions.Length).ToArray();
+        while (queue.Count > 0)
+        {
+            FlowFieldPoint point = queue.Dequeue();
+            order.Randomize();
+            for (var i = 0; i < Directions.Length; i++)
+            {
+                int2 dir = Directions[order[i]];
+                int2 neighborPos = point.position + dir;
+                int index = DataIndex(neighborPos);
+                if (!InBounds(neighborPos) || exploredTiles.Contains(neighborPos) ||
+                    !data[index].traversable)
+                    continue;
+
+                queue.Enqueue(new FlowFieldPoint
+                {
+                    position = neighborPos,
+                    exitDistance = point.exitDistance + 1,
+                });
+                exploredTiles.Add(neighborPos);
+                data[index].exitDirection = -dir;
+            }
+        }
+    }
+    
+    struct FlowFieldPoint
+    {
+        public int exitDistance;
+        public int2 position;
     }
 
     void OnDrawGizmos()
