@@ -36,6 +36,21 @@ public class GridManager : MonoBehaviour
 
         Instance = this;
     }
+    
+    public GridPoint GetData(float3 worldPos)
+    {
+        return GetData(WorldToGridPos(worldPos));
+    }
+
+    public GridPoint GetData(int2 gridPos)
+    {
+        return GetData(DataIndex(gridPos));
+    }
+
+    public GridPoint GetData(int index)
+    {
+        return data[index];
+    }
 
     public int DataIndex(int2 gridPos)
     {
@@ -45,10 +60,16 @@ public class GridManager : MonoBehaviour
         return index;
     }
     
-    public int2 GridPosFromWorldPos(float3 worldPos)
+    public int2 WorldToGridPos(float3 worldPos)
     {
         float2 relPos = (worldPos.xz - posOffset) / tileSize;
         return math.clamp((int2)math.round(relPos), 0, gridSize);
+    }
+    
+    public float3 GridToWorldPos(int2 gridPos)
+    {
+        float2 flatPos = gridPos * tileSize + posOffset;
+        return new float3(flatPos.x, 0, flatPos.y);
     }
 
     public bool InBounds(int2 pos)

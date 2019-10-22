@@ -13,10 +13,10 @@ public class GridSystem : ComponentSystem
     protected override void OnUpdate()
     {
         GridManager gridManager = GridManager.Instance;
-        Entities.ForEach((Entity entity, ref Tag_GridObstacle tag, ref Translation trans) =>
+        Entities.WithAll(typeof(Tag_GridObstacle)).ForEach((Entity entity, ref Translation trans) =>
         {
             //remove tag and add position to grid
-            int2 gridPos = gridManager.GridPosFromWorldPos(trans.Value);
+            int2 gridPos = gridManager.WorldToGridPos(trans.Value);
             int index = gridManager.DataIndex(gridPos);
             gridManager.data[index] = new GridPoint
             {

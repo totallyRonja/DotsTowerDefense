@@ -257,6 +257,7 @@ MonoBehaviour:
   exit:
     x: 9
     y: 9
+  data: []
 --- !u!4 &688777833
 Transform:
   m_ObjectHideFlags: 0
