@@ -13,6 +13,7 @@ public class GridSystem : ComponentSystem
     protected override void OnUpdate()
     {
         GridManager gridManager = GridManager.Instance;
+        bool updatedGrid = false;
         Entities.WithAll(typeof(Tag_GridObstacle)).ForEach((Entity entity, ref Translation trans) =>
         {
             //remove tag and add position to grid
@@ -25,7 +26,10 @@ public class GridSystem : ComponentSystem
             };
             
             PostUpdateCommands.RemoveComponent(entity, typeof(Tag_GridObstacle));
+            updatedGrid = true;
         });
-        gridManager.RecalculatePaths();
+
+        if(updatedGrid)
+            gridManager.RecalculatePaths();
     }
 }

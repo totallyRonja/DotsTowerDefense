@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
+[UpdateAfter(typeof(GridSystem))]
 public class FlowfieldMovementSystem : ComponentSystem
 {
 

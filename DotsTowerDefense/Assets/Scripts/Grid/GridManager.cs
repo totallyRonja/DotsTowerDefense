@@ -106,9 +106,10 @@ public class GridManager : MonoBehaviour
             {
                 int2 dir = Directions[order[i]];
                 int2 neighborPos = point.position + dir;
-                int index = DataIndex(neighborPos);
+                //assigning the int in the if statement is slightly cursed, but I need to get the index after I know the position is in the bounds
+                int index;
                 if (!InBounds(neighborPos) || exploredTiles.Contains(neighborPos) ||
-                    !data[index].traversable)
+                    !data[index = DataIndex(neighborPos)].traversable)
                     continue;
 
                 queue.Enqueue(new FlowFieldPoint
